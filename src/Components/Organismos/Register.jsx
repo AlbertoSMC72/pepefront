@@ -1,44 +1,39 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Cambiado a useNavigate
+import { useNavigate } from "react-router-dom";
 import './styles/Register.css';
 
 const Register = () => {
-  const [correo_electronico, setEmail] = useState("");
-  const [contraseña, setcontraseña] = useState("");
-  const [nombre, setNombre] = useState("");
-  const [apellido, setApellido] = useState("")
-  const navigate = useNavigate(); // Cambiado a useNavigate
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [username, setUsername] = useState("");
+  const [usuario, setUsuario] = useState(false);
+  const [administrador, setAdministrador] = useState(false);
+  const navigate = useNavigate();
 
   const handleRegister = (e) => {
-    e.preventDefault(); // Evitar el envío del formulario por defecto
+    e.preventDefault();
 
-    // Validar los campos antes de redirigir o enviar datos a la API
-    if (!correo_electronico || !contraseña || !nombre || !apellido) {
+    if (!email || !password || !username) {
       alert("Por favor, complete todos los campos.");
       return;
     }
 
-    console.log( JSON.stringify({ correo_electronico, contraseña,nombre,apellido }))
-    //Aquí puedes agregar lógica para enviar datos a la API o realizar el registro de usuario
-    // Ejemplo: enviar datos a la API
-    fetch('http://localhost:8080/api/user/', {
+    fetch('http://34.232.253.16:3000/Usuarios/usuarios', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ correo_electronico, contraseña,nombre,apellido }),
+      body: JSON.stringify({ Email: email, Password: password, Username: username, Usuario: usuario, administrador: administrador }),
     })
       .then(response => response.json())
       .then(data => {
         console.log('Registro exitoso:', data);
-        history.push("/"); // Redirigir a la página principal después del registro exitoso
+        navigate("/"); // Redirigir a la página principal después del registro exitoso
       })
       .catch(error => {
         console.error('Error al registrar:', error);
-        alert('Se ha agregado excitosamente.');
+        alert('Error al registrar.');
       });
-
-    // Simulación de redirección después del registro exitoso
   };      
   
   return (
@@ -46,47 +41,52 @@ const Register = () => {
       <div className="register-box">
         <h2>Register</h2>
         <form onSubmit={handleRegister}>
-        <label>Nombre</label>
+          <label>Username</label>
           <div className="input-box">
             <input
               type="text"
               required
-              value={nombre}
-              onChange={(e) => setNombre(e.target.value)}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
             />
-       
           </div>
 
-          <label>Apellido</label>
-          <div className="input-box">
-            <input
-              type="text"
-              required
-              value={apellido}
-              onChange={(e) => setApellido(e.target.value)}
-            />
-
-          </div>
           <label>Email</label>
           <div className="input-box">
             <input
               type="email"
               required
-              value={correo_electronico}
+              value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
-
           </div>
 
-          <label>Contraseña</label>
+          <label>Password</label>
           <div className="input-box">
             <input
               type="password"
               required
-              value={contraseña}
-              onChange={(e) => setcontraseña(e.target.value)}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
+          </div>
 
+          <label>Usuario</label>
+          <div className="input-box">
+            <input
+              type="checkbox"
+              checked={usuario}
+              onChange={(e) => setUsuario(e.target.checked)}
+            />
+          </div>
+
+          <label>Administrador</label>
+          <div className="input-box">
+            <input
+              type="checkbox"
+              checked={administrador}
+              onChange={(e) => setAdministrador(e.target.checked)}
+            />
           </div>
 
           <button type="submit" className="btn">

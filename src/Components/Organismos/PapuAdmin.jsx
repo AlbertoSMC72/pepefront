@@ -9,32 +9,42 @@ function GameUnlocker() {
   const [gameTitles, setGameTitles] = useState([]);
 
   useEffect(() => {
-    const savedTitles = JSON.parse(localStorage.getItem('gameTitles'));
-    if (savedTitles) {
-      setGameTitles(savedTitles);
-    }
+    const fetchGameTitles = async () => {
+      try {
+        const response = await fetch('http://34.232.253.16:3000/Gamess/games');
+        if (response.ok) {
+          const data = await response.json();
+          setGameTitles(data);
+        } else {
+          console.error('Error al obtener los juegos');
+        }
+      } catch (error) {
+        console.error('Error de red:', error);
+      }
+    };
+
+    fetchGameTitles();
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem('gameTitles', JSON.stringify(gameTitles));
-  }, [gameTitles]);
-
   const handleAddGame = async () => {
-    const formData = new FormData();
-    formData.append('name', gameName);
-    formData.append('price', gamePrice);
-    formData.append('account', gameAccount);
-    formData.append('image', selectedImage);
-
     try {
+      const gameData = {
+        Nombre: gameName,
+        Precio: gamePrice,
+        Cuenta: gameAccount,
+        Imagen: selectedImage
+      };
+  
       const response = await fetch('http://34.232.253.16:3000/Gamess/games', {
         method: 'POST',
-        body: formData,
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(gameData)
       });
-
-      console.log(response); // Agrega este console.log para ver la respuesta
-
+  
       if (response.ok) {
+        alert('Juego agregado correctamente');
         const newGameTitles = [...gameTitles, { name: gameName, price: gamePrice, account: gameAccount, image: selectedImage }];
         setGameTitles(newGameTitles);
         setGameName('');
@@ -42,13 +52,16 @@ function GameUnlocker() {
         setGameAccount('');
         setSelectedImage('');
       } else {
+        alert('Error al agregar el juego');
         console.error('Error al agregar el juego');
       }
     } catch (error) {
+      alert('Error de red');
       console.error('Error de red:', error);
     }
   };
-
+  
+  
   return (
     <div>
       <div style={{ margin: '0', padding: '0', fontFamily: 'Arial, sans-serif', color: "#fff" }}>
@@ -64,27 +77,27 @@ function GameUnlocker() {
             type="text"
             value={gameName}
             onChange={(e) => setGameName(e.target.value)}
-            style={{ width: '300px', padding: '10px', fontSize: '16px', marginBottom: '20px', textAlign: 'center',}}
+            style={{ width: '300px', padding: '10px', fontSize: '16px', marginBottom: '20px', textAlign: 'center', }}
             placeholder="Nombre del juego"
           />
           <input
             type="text"
             value={gamePrice}
             onChange={(e) => setGamePrice(e.target.value)}
-            style={{ width: '300px', padding: '10px', fontSize: '16px', marginBottom: '20px', textAlign: 'center',}}
+            style={{ width: '300px', padding: '10px', fontSize: '16px', marginBottom: '20px', textAlign: 'center', }}
             placeholder="Precio del juego"
           />
           <input
             type="text"
             value={gameAccount}
             onChange={(e) => setGameAccount(e.target.value)}
-            style={{ width: '300px', padding: '10px', fontSize: '16px', marginBottom: '20px', textAlign: 'center',}}
+            style={{ width: '300px', padding: '10px', fontSize: '16px', marginBottom: '20px', textAlign: 'center', }}
             placeholder="Region del juego"
           />
           <input
             type="file"
             onChange={(e) => setSelectedImage(e.target.files[0])}
-            style={{ width: '300px', padding: '10px', fontSize: '16px', marginBottom: '20px', textAlign: 'center',}}
+            style={{ width: '300px', padding: '10px', fontSize: '16px', marginBottom: '20px', textAlign: 'center', }}
             placeholder="Imagen del dispositivo"
           />
           <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -98,35 +111,26 @@ function GameUnlocker() {
           <table style={{ width: '90%', margin: '0 auto', borderCollapse: 'collapse', textAlign: 'center' }}>
             <thead>
               <tr>
-                <th style={{ padding: '10px',border: '1px solid #ccc' }}>Nombre</th>
+                <th style={{ padding: '10px', border: '1px solid #ccc' }}>Nombre</th>
                 <th style={{ padding: '10px', border: '1px solid #ccc' }}>Precio</th>
                 <th style={{ padding: '10px', border: '1px solid #ccc' }}>Region</th>
                 <th style={{ padding: '10px', border: '1px solid #ccc' }}>Imagen</th>
-                <th style={{ padding: '10px', border: '1px solid #ccc' }}>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {gameTitles.map((game, index) => (
                 <tr key={index}>
-                  <td style={{ padding: '10px', border: '1px solid #ccc' }}>{game.name}</td>
-                  <td style={{ padding: '10px', border: '1px solid #ccc' }}>{game.price}</td>
-                  <td style={{ padding: '10px', border: '1px solid #ccc' }}>{game.account}</td>
+                  <td style={{ padding: '10px', border: '1px solid #ccc' }}>{game.Nombre}</td>
+                  <td style={{ padding: '10px', border: '1px solid #ccc' }}>{game.Precio}</td>
+                  <td style={{ padding: '10px', border: '1px solid #ccc' }}>{game.Cuenta}</td>
                   <td style={{ padding: '10px', border: '1px solid #ccc' }}>
                     {
-                      game.image ? (
-                        <img src={URL.createObjectURL(game.image)} alt={game.name} style={{ maxWidth: '100px' }} />
+                      game.Imagen ? (
+                        <img src={game.Imagen} alt={game.Nombre} style={{ maxWidth: '100px' }} />
                       ) : (
                         'No image'
                       )
                     }
-                  </td>
-                  <td style={{ padding: '10px', border: '1px solid #ccc' }}>
-                    <button
-                      style={{ backgroundColor: '#F44336', color: '#fff', padding: '5px 10px', border: 'none', borderRadius: '5px', cursor: 'pointer' }}
-                      onClick={() => handleDeleteGame(index)}
-                    >
-                      Eliminar
-                    </button>
                   </td>
                 </tr>
               ))}
